@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit",
-    "test": "tsx --test src/auth/utils/authValidation.test.ts src/api/productPayload.test.ts src/utils/productAvailability.test.ts src/utils/navigationVisibility.test.ts"
+    "test": "tsx --test src/auth/utils/authValidation.test.ts src/auth/services/apiUrl.test.ts src/api/productPayload.test.ts src/utils/productAvailability.test.ts src/utils/navigationVisibility.test.ts"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",

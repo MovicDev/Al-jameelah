@@ -1,6 +1,7 @@
 import { clearSession, readSession } from './sessionStore';
+import { resolveApiUrl } from './apiUrl';
 
-const API_URL = (import.meta.env.VITE_API_URL ?? 'http://localhost:4000/api').replace(/\/$/, '');
+const API_URL = resolveApiUrl(import.meta.env.VITE_API_URL, import.meta.env.DEV);
 
 interface ApiErrorBody {
   error?: {
