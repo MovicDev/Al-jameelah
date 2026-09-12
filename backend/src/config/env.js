@@ -12,6 +12,22 @@ dotenv.config({
 });
 
 const requiredInProduction = ['MONGODB_URI', 'JWT_SECRET'];
+const LOCAL_FRONTEND_URL = 'http://localhost:3000';
+const DEPLOYED_FRONTEND_URL = 'https://al-jameelah-rho.vercel.app';
+
+const nodeEnv = process.env.NODE_ENV ?? 'development';
+const frontendUrl = process.env.FRONTEND_URL?.trim()
+  || (nodeEnv === 'production' ? DEPLOYED_FRONTEND_URL : LOCAL_FRONTEND_URL);
+const additionalCorsOrigins = (process.env.CORS_ORIGINS ?? '')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+const corsOrigins = [...new Set([
+  frontendUrl,
+  DEPLOYED_FRONTEND_URL,
+  ...(nodeEnv === 'production' ? [] : [LOCAL_FRONTEND_URL]),
+  ...additionalCorsOrigins,
+])];
 
 const parseInteger = (value, fallback) => {
   const parsed = Number.parseInt(value ?? '', 10);
@@ -19,13 +35,14 @@ const parseInteger = (value, fallback) => {
 };
 
 export const env = Object.freeze({
-  nodeEnv: process.env.NODE_ENV ?? 'development',
+  nodeEnv,
   port: parseInteger(process.env.PORT, 4000),
   mongodbUri: process.env.MONGODB_URI ?? '',
   jwtSecret: process.env.JWT_SECRET ?? '',
   jwtExpiresIn: process.env.JWT_EXPIRES_IN ?? '7d',
-  frontendUrl: process.env.FRONTEND_URL ?? 'http://localhost:3000',
-  appUrl: process.env.APP_URL ?? process.env.FRONTEND_URL ?? 'http://localhost:3000',
+  frontendUrl,
+  corsOrigins,
+  appUrl: process.env.APP_URL ?? frontendUrl,
   admin: {
     fullName: process.env.SEED_ADMIN_NAME?.trim() || DEFAULT_ADMIN.fullName,
     email: process.env.SEED_ADMIN_EMAIL?.trim().toLowerCase() || DEFAULT_ADMIN.email,

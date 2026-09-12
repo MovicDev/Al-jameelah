@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import request from 'supertest';
-import { createApp } from '../src/app.js';
+
+process.env.FRONTEND_URL = 'https://al-jameelah.onrender.com';
+const { createApp } = await import('../src/app.js');
 
 const app = createApp();
 
@@ -9,6 +11,23 @@ test('health endpoint reports a ready HTTP process', async () => {
   const response = await request(app).get('/health');
   assert.equal(response.status, 200);
   assert.deepEqual(response.body, { success: true, status: 'ok' });
+});
+
+test('CORS preflight allows the deployed Vercel frontend', async () => {
+  const preflight = (origin) => request(app)
+    .options('/api/auth/login')
+    .set('Origin', origin)
+    .set('Access-Control-Request-Method', 'POST')
+    .set('Access-Control-Request-Headers', 'content-type');
+
+  const [response, untrustedResponse] = await Promise.all([
+    preflight('https://al-jameelah-rho.vercel.app'),
+    preflight('https://malicious.example'),
+  ]);
+
+  assert.equal(response.status, 204);
+  assert.equal(response.headers['access-control-allow-origin'], 'https://al-jameelah-rho.vercel.app');
+  assert.equal(untrustedResponse.headers['access-control-allow-origin'], undefined);
 });
 
 test('registration rejects weak or malformed identity data before persistence', async () => {
